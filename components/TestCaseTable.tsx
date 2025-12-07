@@ -149,12 +149,12 @@ export const TestCaseTable: React.FC<TestCaseTableProps> = ({ data }) => {
         <table className="w-full text-sm text-left text-slate-600 border-separate border-spacing-0">
           <thead className="text-xs text-slate-700 uppercase bg-slate-50 sticky top-0 z-10">
             <tr>
-              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50">编号</th>
-              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50">场景名称</th>
-              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 min-w-[150px]">数据准备</th>
-              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 min-w-[200px]">操作步骤</th>
-              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 min-w-[150px]">执行动作</th>
-              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 min-w-[150px]">预期结果</th>
+              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 w-20">编号</th>
+              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 w-48">场景名称</th>
+              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 min-w-[200px]">数据准备</th>
+              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 min-w-[300px]">操作步骤</th>
+              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 min-w-[200px]">执行动作</th>
+              <th scope="col" className="px-4 py-3 border-b border-slate-200 bg-slate-50 min-w-[300px]">预期结果</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -163,8 +163,8 @@ export const TestCaseTable: React.FC<TestCaseTableProps> = ({ data }) => {
                 <td className="px-4 py-3 font-medium text-slate-900 whitespace-nowrap align-top">{scenario.id}</td>
                 <td className="px-4 py-3 align-top font-medium">{scenario.scenarioName}</td>
                 <td className="px-4 py-3 align-top whitespace-pre-line text-slate-500">{scenario.dataPreparation}</td>
-                <td className="px-4 py-3 align-top max-w-xs truncate" title={scenario.steps}>
-                    <span className="block truncate">{scenario.steps}</span>
+                <td className="px-4 py-3 align-top whitespace-pre-line" title={scenario.steps}>
+                    {scenario.steps}
                 </td>
                 <td className="px-4 py-3 align-top whitespace-pre-line">{scenario.executionAction}</td>
                 <td className="px-4 py-3 align-top text-green-700 font-medium whitespace-pre-line">{scenario.expectedResult}</td>
