@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AutoQA - 智能测试用例生成助手</title>
     
-    <!-- 拦截 Tailwind CDN 的生产环境警告 -->
+    <!-- 1. Polyfill process for browser environments (Netlify/Vite) to prevent crash on process.env access -->
+    <script>
+      window.process = window.process || { env: { NODE_ENV: 'production' } };
+    </script>
+
+    <!-- 2. Intercept Tailwind CDN warnings -->
     <script>
       const originalWarn = console.warn;
       console.warn = (...args) => {
@@ -60,5 +65,7 @@
 </head>
   <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
+    <!-- 3. CRITICAL: Import the React entry point -->
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
