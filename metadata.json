@@ -1,0 +1,5 @@
+{
+  "name": "AutoQA - Intelligent Test Case Generator",
+  "description": "An AI-powered agent that analyzes requirements and generates structured test cases suitable for XMind, visualizing them in an interactive mind map.",
+  "requestFramePermissions": []
+}
