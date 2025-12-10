@@ -1,9 +1,18 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { TestSuite } from "../types";
 
-const apiKey = process.env.API_KEY || '';
-
-const ai = new GoogleGenAI({ apiKey });
+// Helper function to get the AI client with dynamic key
+const getAiClient = () => {
+  // Prioritize the key from LocalStorage (User Settings), fallback to env variable
+  const localKey = localStorage.getItem('gemini_api_key');
+  const apiKey = localKey || process.env.API_KEY || '';
+  
+  if (!apiKey) {
+    throw new Error("未检测到 API Key。请点击右上角设置按钮，输入您的 Google Gemini API Key。");
+  }
+  
+  return new GoogleGenAI({ apiKey });
+};
 
 const testCaseSchema: Schema = {
   type: Type.OBJECT,
@@ -38,6 +47,9 @@ export const generateTestCases = async (requirements: string): Promise<TestSuite
   }
 
   try {
+    // Get a fresh instance with the current key
+    const ai = getAiClient();
+    
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: `
@@ -69,8 +81,12 @@ export const generateTestCases = async (requirements: string): Promise<TestSuite
     if (!text) throw new Error("Gemini 未返回任何内容。");
     
     return JSON.parse(text) as TestSuite;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
+    // Enhance error message for 429
+    if (error.toString().includes("429") || (error.status === 429)) {
+        throw new Error("API 调用配额已耗尽 (429)。请点击右上角设置图标，更换一个新的 API Key。");
+    }
     throw error;
   }
 };
@@ -94,27 +110,35 @@ const fileToGenerativePart = async (file: File) => {
 
 export const generateTestCasesFromImage = async (imageFile: File, additionalText: string = ""): Promise<TestSuite> => {
   try {
+    // Get a fresh instance with the current key
+    const ai = getAiClient();
+    
     const imagePart = await fileToGenerativePart(imageFile);
     
     const prompt = `
-      你是一位资深软件测试专家。请仔细分析这张流程图图片。
+      你是一位精通**路径覆盖测试 (Path Coverage Testing)**的资深测试专家。请仔细分析这张业务流程图图片。
       
-      任务目标：
-      1. 识别图中的开始节点、结束节点、处理步骤（矩形）和判定节点（菱形）。
-      2. 梳理出流程图中所有的业务路径，包括正常流转路径和异常/分支路径。
-      3. 基于这些路径，生成一套完整的测试用例。
+      **核心任务：**
+      识别流程图中的所有逻辑路径，并为每一条从“开始”到“结束”的独立路径生成一个对应的测试用例。
       
-      ${additionalText ? `补充说明: "${additionalText}"` : ""}
+      **分析步骤：**
+      1. **节点识别**：识别流程图中的处理节点（矩形）、判定节点（菱形/判断框）、开始/结束节点。
+      2. **路径遍历**：针对每一个判定节点（Decision Node），必须分别覆盖其所有分支（例如：“是/Yes”路径 和 “否/No”路径）。
+      3. **条件推导**：根据路径走向，反推所需的测试数据。例如：若路径走的是“金额>1000”的分支，则测试数据准备中应包含“申请金额为 1001”。
       
+      ${additionalText ? `补充业务背景说明: "${additionalText}"` : ""}
+      
+      **输出要求：**
       请输出 JSON 格式，内容必须使用**中文**。
-      每个测试用例必须严格遵循以下格式要求：
+      每个测试用例（Scenario）对应流程图中的一条完整路径，格式要求如下：
 
-      1. Feature Name (功能名称 - 基于流程图标题或内容推断)
-      2. Scenario ID (场景编号)
-      3. Data Preparation (测试数据准备 - **如果有多项，必须使用序号列表 1. 2. 并使用 \\n 换行**)
-      4. Steps (操作步骤 - **必须使用序号列表 1. 2. 分行描述流程图中的路径步骤**，例如：\n1. 用户提交申请\n2. 经理审批通过)
-      5. Execution Action (执行动作 - 导致状态变更的关键操作，按序号分行)
-      6. Expected Result (预期结果 - 对应流程图的结束状态或中间反馈，**必须按序号列表 1. 2. 分行显示**)
+      1. **Feature Name**: (功能名称 - 提取流程图的主标题)
+      2. **Scenario ID**: (场景编号 - 例如 TC_FLOW_001)
+      3. **Scenario Name**: (场景名称 - 简要描述该路径的业务含义，例如 "审批流程-金额超限被拒绝")
+      4. **Data Preparation**: (测试数据准备 - **必须使用序号列表 1. 2. 并换行**。根据该路径经过的判断条件，列出具体的前置数据。)
+      5. **Steps**: (操作步骤 - **必须使用序号列表 1. 2. 分行**。严格按照流程图该路径上的节点顺序描述步骤。)
+      6. **Execution Action**: (执行动作 - 触发流程流转或提交的关键操作)
+      7. **Expected Result**: (预期结果 - **必须使用序号列表 1. 2. 分行**。描述该路径终点的状态或中间的关键系统反馈。)
       
       文本中的换行请使用 standard newline character (\\n).
     `;
@@ -138,8 +162,11 @@ export const generateTestCasesFromImage = async (imageFile: File, additionalText
     
     return JSON.parse(text) as TestSuite;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini Vision API Error:", error);
+    if (error.toString().includes("429") || (error.status === 429)) {
+        throw new Error("API 调用配额已耗尽 (429)。请点击右上角设置图标，更换一个新的 API Key。");
+    }
     throw error;
   }
 };

@@ -25,6 +25,9 @@ export const FlowchartGenerator: React.FC = () => {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
       setError(null);
+      // Clear previous results when new image is uploaded
+      setTestSuite(null);
+      setSelectedScenario(null);
     } else {
       setError("请上传有效的图片文件 (JPG, PNG, WebP)。");
     }
@@ -52,6 +55,8 @@ export const FlowchartGenerator: React.FC = () => {
     setImageFile(null);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
+    setTestSuite(null);
+    setSelectedScenario(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 

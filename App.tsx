@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Bot, FileText, History, Workflow } from 'lucide-react';
+import { Bot, FileText, History, Workflow, Settings } from 'lucide-react';
 import { TestGenerator } from './components/TestGenerator';
 import { FlowchartGenerator } from './components/FlowchartGenerator';
+import { SettingsModal } from './components/SettingsModal';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'new' | 'old' | 'flowchart'>('new');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <div className="h-screen bg-slate-100 flex flex-col font-sans overflow-hidden">
@@ -19,6 +21,14 @@ const App: React.FC = () => {
             <p className="text-xs text-slate-500 font-medium">基于 AI 驱动的测试用例生成器</p>
           </div>
         </div>
+        
+        <button
+          onClick={() => setIsSettingsOpen(true)}
+          className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-all"
+          title="API Key 设置"
+        >
+          <Settings size={20} />
+        </button>
       </header>
 
       {/* Tabs */}
@@ -73,6 +83,9 @@ const App: React.FC = () => {
            <FlowchartGenerator />
         </div>
       </main>
+
+      {/* Settings Modal */}
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 };
