@@ -1,3 +1,4 @@
+
 export interface TestCaseScenario {
   id: string;
   scenarioName: string;
@@ -12,10 +13,18 @@ export interface TestSuite {
   scenarios: TestCaseScenario[];
 }
 
-// Represents a node in the D3 tree visualization
 export interface MindMapNode {
   name: string;
   type: 'root' | 'scenario' | 'detail';
   data?: TestCaseScenario;
   children?: MindMapNode[];
+}
+
+export type ModelProvider = 'gemini-api' | 'local-nano' | 'local-custom';
+
+export interface ModelOption {
+  id: string;
+  name: string;
+  provider: ModelProvider;
+  description: string;
 }
